@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Jeep model preview</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --ink: #e8e4dc;
+        --dim: #9a948a;
+        --panel: rgba(14, 15, 18, 0.82);
+        --line: rgba(255, 255, 255, 0.11);
+        --accent: #ffb347;
+      }
+      * { box-sizing: border-box; }
+      html, body {
+        margin: 0;
+        height: 100%;
+        overflow: hidden;
+        background: #05060a;
+        font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        color: var(--ink);
+      }
+      canvas { display: block; }
+      .panel {
+        position: fixed;
+        padding: 9px 11px;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        backdrop-filter: blur(8px);
+        user-select: none;
+        white-space: pre;
+      }
+      #stats { top: 10px; right: 10px; min-width: 176px; font-size: 11px; }
+      #keys { top: 10px; left: 10px; font-size: 11px; }
+      #stats b, #keys b { color: var(--accent); }
+      #keys i { color: var(--dim); font-style: normal; }
+      #mode {
+        position: fixed;
+        bottom: 12px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 6px 14px;
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        color: var(--accent);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="panel" id="stats"></div>
+    <div class="panel" id="keys"></div>
+    <div id="mode"></div>
+    <script type="module" src="./jeep.preview.ts"></script>
+  </body>
+</html>

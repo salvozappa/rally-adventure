@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Rally audio preview</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --ink: #e8e4dc;
+        --dim: #9a948a;
+        --panel: rgba(14, 15, 18, 0.86);
+        --line: rgba(255, 255, 255, 0.1);
+        --accent: #ffb347;
+      }
+      * { box-sizing: border-box; }
+      html, body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: #05060a;
+        font: 12px/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        color: var(--ink);
+      }
+      #app {
+        display: grid;
+        grid-template-columns: 268px 1fr;
+        gap: 12px;
+        padding: 12px;
+        min-height: 100vh;
+      }
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 10px 12px 12px;
+      }
+      h4 {
+        margin: 14px 0 6px;
+        font-size: 10px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--accent);
+        border-bottom: 1px solid var(--line);
+        padding-bottom: 3px;
+      }
+      h4:first-child { margin-top: 0; }
+      label.row {
+        display: grid;
+        grid-template-columns: 74px 1fr 46px;
+        align-items: center;
+        gap: 6px;
+        margin: 4px 0;
+        color: var(--dim);
+      }
+      label.row b { color: var(--ink); font-weight: 500; text-align: right; font-variant-numeric: tabular-nums; }
+      input[type='range'] { width: 100%; accent-color: var(--accent); }
+      select, button {
+        font: inherit;
+        color: var(--ink);
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid var(--line);
+        border-radius: 5px;
+        padding: 4px 8px;
+      }
+      button { cursor: pointer; }
+      button:hover { background: rgba(255, 255, 255, 0.12); }
+      button:disabled { opacity: 0.4; cursor: default; }
+      .btns { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+      .btns button { flex: 1 1 auto; }
+      #cycle { background: rgba(255, 179, 71, 0.18); border-color: rgba(255, 179, 71, 0.5); }
+      canvas { display: block; width: 100%; border-radius: 6px; background: #07080c; border: 1px solid var(--line); }
+      #spectrum { height: 340px; }
+      #wave { height: 130px; margin-top: 10px; }
+      pre {
+        margin: 0;
+        white-space: pre;
+        overflow-x: auto;
+        font-size: 11px;
+        line-height: 1.5;
+        color: var(--dim);
+      }
+      #readout { color: var(--ink); }
+      #report { max-height: 420px; overflow: auto; font-size: 10.5px; line-height: 1.45; }
+      #status { color: var(--accent); font-size: 10px; }
+      .cols { display: grid; grid-template-columns: 1fr 300px; gap: 12px; align-items: start; }
+      @media (max-width: 1100px) { .cols { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <div class="panel">
+        <h4>Transport</h4>
+        <div class="btns">
+          <button id="start">START AUDIO</button>
+          <button id="mute">MUTE</button>
+        </div>
+        <label class="row"><span>volume</span><input id="volume" type="range" min="0" max="1" step="0.01" value="0.85" /><b>0.85</b></label>
+        <div><span id="status">idle</span></div>
+
+        <h4>Mode</h4>
+        <select id="mode" style="width: 100%">
+          <option value="manual">manual sliders</option>
+          <option value="cycle">drive cycle</option>
+        </select>
+        <div class="btns"><button id="cycle">RUN DRIVE CYCLE</button></div>
+
+        <h4>Engine</h4>
+        <label class="row"><span>rpm</span><input id="rpm" type="range" min="0" max="7200" step="10" value="760" /><b>760</b></label>
+        <label class="row"><span>load</span><input id="load" type="range" min="-1" max="1" step="0.01" value="0" /><b>0.00</b></label>
+        <label class="row"><span>gear</span><input id="gear" type="range" min="0" max="5" step="1" value="1" /><b>1</b></label>
+
+        <h4>Chassis</h4>
+        <label class="row"><span>speed m/s</span><input id="speed" type="range" min="0" max="45" step="0.1" value="0" /><b>0.0</b></label>
+        <label class="row"><span>slip ratio</span><input id="slipRatio" type="range" min="0" max="2" step="0.01" value="0" /><b>0.00</b></label>
+        <label class="row"><span>slip angle</span><input id="slipAngle" type="range" min="0" max="0.9" step="0.01" value="0" /><b>0.00</b></label>
+        <label class="row"><span>compress</span><input id="compression" type="range" min="0" max="1" step="0.01" value="0.45" /><b>0.45</b></label>
+        <label class="row"><span>surface</span><select id="surface"></select><b></b></label>
+        <label class="row"><span>airborne</span><input id="airborne" type="checkbox" /><b></b></label>
+
+        <h4>One-shots</h4>
+        <div class="btns">
+          <button id="landing">LANDING (hard)</button>
+          <button id="landingSoft">LANDING (soft)</button>
+          <button id="collision">COLLISION</button>
+        </div>
+
+        <h4>Verification</h4>
+        <div class="btns"><button id="offline">RUN OFFLINE ANALYSIS</button></div>
+      </div>
+
+      <div>
+        <div class="cols">
+          <div class="panel">
+            <canvas id="spectrum"></canvas>
+            <canvas id="wave"></canvas>
+          </div>
+          <div class="panel"><pre id="readout">…</pre></div>
+        </div>
+        <div class="panel" style="margin-top: 12px">
+          <h4>Offline analysis</h4>
+          <pre id="report">press RUN OFFLINE ANALYSIS</pre>
+        </div>
+      </div>
+    </div>
+    <script type="module">
+      // Live slider value labels.
+      for (const l of document.querySelectorAll('label.row')) {
+        const i = l.querySelector('input[type=range]');
+        const b = l.querySelector('b');
+        if (!i || !b) continue;
+        const sync = () => (b.textContent = i.value);
+        i.addEventListener('input', sync);
+        sync();
+      }
+    </script>
+    <script type="module" src="./audio.preview.ts"></script>
+  </body>
+</html>

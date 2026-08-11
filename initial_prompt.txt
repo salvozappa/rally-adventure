@@ -1,0 +1,11 @@
+I want you to build a car driving game. Make the graphics as beautiful as you can, but I want a retro feeling. Think along the lines of screamer rally (find screenshots). It's ok to have a retro look but it needs to have textures. Focus on the physics and the car model for now. We can think about level design later. Make a basic level that has enough slopes to test the physics.
+
+Fan out sub-agents and have sub-agents tackle each one individually so that the game is utterly perfect. Avoid workflows and favor teammates and subagents.
+
+Don't stop until you are absolutely woowed with the quality when compared to a real quality game. To check the quality, find and build a corpus of reference images from the internet. It should literally compare them side by side blind and say which one looks better.
+
+Do this in ThreeJS & TypeScript.
+
+Always focus on broad perfection acrolss all details of the game, never pidgeon hole, always focus on the big picture, when in doubt zoom out. work on the biggest highest impact features for graphics, gameplay, fun factor and total cohesion.
+
+This is an off road adventure game, you drive an off road jeep. The setting is in the wild outdoors.

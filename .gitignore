@@ -1,0 +1,12 @@
+node_modules/
+dist/
+reference/blind/
+*.log
+
+# Third-party reference screenshots — copyrighted, dev-only, not redistributable.
+# See reference/SOURCES.md. Our own captures in reference/progress/ are kept.
+reference/era/
+reference/jeep/
+reference/modern/
+reference/screamer/
+reference/terrain/

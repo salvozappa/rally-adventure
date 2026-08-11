@@ -1,0 +1,1 @@
+{ "extends": "./tsconfig.json", "include": ["src/render/textures.ts", "src/render/texturePatterns.ts", "src/render/proceduralNoise.ts"] }
