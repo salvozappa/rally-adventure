@@ -19,6 +19,54 @@ P retro pipeline on/off · H hide controls · F3 frame counter
 `window.game` is exposed for poking at runtime: `terrain`, `vehicle`, `jeep`,
 `camera`, `engine`, `fx`, `sky`, `audio`, `hud`, `expedition`, `input`.
 
+## Recording video
+
+Press **V** in the game. It records the canvas and the game's own audio mix to a
+WebM (VP9 + Opus) and downloads it when you press V again. The control legend
+and frame counter hide themselves while rolling and come back afterwards; a
+small REC timer stays top-right.
+
+Recording the canvas rather than the screen means no window chrome, no cursor,
+no compositor scaling, and a clean fixed frame size.
+
+**Click the page once before recording.** Browsers keep the `AudioContext`
+suspended until a user gesture, and a suspended context hands MediaRecorder a
+track that never delivers a sample — which stalls the *whole* file, video
+included. `GameAudio.captureStream()` refuses in that state so you get a silent
+take rather than an empty one, and the save message says `(NO AUDIO)` when that
+happens.
+
+Then convert:
+
+```
+tools/clip.sh ~/Downloads/rally-adventure_*.webm  [outdir]
+```
+
+Produces `.mp4` (H.264/AAC, faststart, `yuv420p` so it plays on iOS), a
+palette-optimised `.gif`, and a `-poster.jpg`. It also prints the `<video>` tag.
+Trim first if you want a shorter clip:
+
+```
+ffmpeg -i in.webm -ss 3 -t 8 -c copy trimmed.webm
+```
+
+Note MediaRecorder writes WebM without a duration header (`duration=N/A`), which
+breaks seeking in some players. The MP4 conversion fixes it.
+
+### Getting footage worth publishing
+
+- **Change camera.** The default chase view sits directly in the dust plume; at
+  speed on sand the car disappears entirely. **C** cycles chase / far chase /
+  hood / bumper / orbit — far chase and orbit are much better for showing the
+  vehicle off. Orbit is the one for a hero shot.
+- **Turn the dust down** if it still dominates: `game.fx.setIntensity(0.5)` in
+  the console, live.
+- **T** for golden hour. It is by far the best-looking preset.
+- Drive somewhere green — the spawn sits in the sand wash, which is the least
+  representative ground in the world. North up the valley reaches grass.
+- GIFs are enormous (~11 MB for six seconds at 720p). Use MP4 for anything over
+  about three seconds.
+
 ## Interactive preview pages
 
 Each isolates one subsystem, with its own controls and live instrumentation.

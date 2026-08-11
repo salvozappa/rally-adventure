@@ -53,6 +53,13 @@ cut-out.
 **Symptom:** an object that looks like a silhouette and "doesn't pick up the
 light". Almost never a lighting bug.
 
+## Recording
+
+**V** records canvas + game audio to WebM; `tools/clip.sh` converts to MP4/GIF.
+Click the page first — a suspended `AudioContext` yields a track that never
+delivers a sample and stalls MediaRecorder entirely, producing an empty file
+with no video either. `GameAudio.captureStream()` guards against it.
+
 ## Architecture
 
 Subsystems know nothing about each other; everything crosses through

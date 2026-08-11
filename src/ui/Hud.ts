@@ -21,6 +21,9 @@ export class Hud {
   showTelemetry = false;
   /** H — the control reference. On by default; hide it for clean screenshots. */
   showControls = true;
+  /** Set by the Recorder. Drives the REC indicator. */
+  recording = false;
+  private recTime = 0;
 
   constructor(parent: HTMLElement = document.getElementById('ui') ?? document.body) {
     this.canvas = document.createElement('canvas');
@@ -69,6 +72,13 @@ export class Hud {
     this.drawTiltIndicator(30, H - 74, s);
     if (this.showControls) this.drawControls(8, 8);
 
+    if (this.recording) {
+      this.recTime += dt;
+      this.drawRecIndicator(W - 52, 14);
+    } else {
+      this.recTime = 0;
+    }
+
     if (this.messageTime > 0) {
       this.messageTime -= dt;
       const a = Math.min(1, this.messageTime * 2.5);
@@ -104,6 +114,7 @@ export class Hud {
       ['R', 'RECOVER'],
       ['T', 'TIME OF DAY'],
       ['P', 'RETRO FX'],
+      ['V', 'RECORD'],
       ['H', 'HIDE THIS'],
     ];
 
@@ -124,6 +135,27 @@ export class Hud {
       this.text(key, x + pad, ty, 'left', '#ffd27a', 1, '#241505');
       this.text(label, x + pad + keyCol, ty, 'left', '#9fb2bd', 1, '#10161a');
     });
+  }
+
+  /**
+   * REC dot and elapsed time. Deliberately small and top-right, clear of the
+   * instrument cluster — it is the one overlay that has to stay in the footage,
+   * so it should cost as little of the frame as possible.
+   */
+  private drawRecIndicator(x: number, y: number): void {
+    const c = this.ctx;
+    // Slow blink, so a still frame is as likely as not to catch it lit.
+    const on = this.recTime % 1.4 < 0.95;
+    if (on) {
+      c.beginPath();
+      c.arc(x, y, 3.5, 0, Math.PI * 2);
+      c.fillStyle = '#e03a2a';
+      c.fill();
+    }
+    const t = Math.floor(this.recTime);
+    const mm = String(Math.floor(t / 60)).padStart(2, '0');
+    const ss = String(t % 60).padStart(2, '0');
+    this.text(`REC ${mm}:${ss}`, x + 8, y + 3, 'left', '#e8dccc', 1, '#1a0b08');
   }
 
   private drawTacho(cx: number, cy: number, r: number, s: VehicleState): void {

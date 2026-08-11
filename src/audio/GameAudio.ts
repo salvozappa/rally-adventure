@@ -455,6 +455,28 @@ export class GameAudio {
   }
 
   /**
+   * A `MediaStream` carrying a bus, for recording alongside the canvas.
+   *
+   * Tapped off the bus rather than the context destination, so what gets
+   * recorded is the game mix itself — unaffected by the OS output device, and
+   * still captured when the player has their speakers muted.
+   *
+   * Created on demand; hold the result for the life of the recording.
+   */
+  captureStream(bus: AudioBusName = 'master'): MediaStream | null {
+    const ctx = this.ctx as AudioContext;
+    if (typeof ctx.createMediaStreamDestination !== 'function') return null;
+    // A suspended context hands back a track that never delivers a single
+    // sample, and MediaRecorder then blocks waiting for it — producing a
+    // completely empty file, video included. Refusing here means a recording
+    // started before the audio gesture is silent rather than lost.
+    if (ctx.state !== 'running') return null;
+    const dest = ctx.createMediaStreamDestination();
+    this.busNode(bus).connect(dest);
+    return dest.stream;
+  }
+
+  /**
    * Set a bus level directly. Intended for previews and for a future
    * accessibility mix (e.g. "engine only"); the frame loop does not use it.
    */

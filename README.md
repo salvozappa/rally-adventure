@@ -18,7 +18,8 @@ npm run dev          # http://127.0.0.1:5183
 ```
 
 **WASD** drive · **SPACE** handbrake · **C** camera · **R** recover ·
-**T** time of day · **P** retro pipeline · **H** controls · **F3** frame counter
+**T** time of day · **P** retro pipeline · **V** record video ·
+**H** controls · **F3** frame counter
 
 ## What's in it
 

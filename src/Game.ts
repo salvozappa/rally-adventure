@@ -15,6 +15,7 @@ import { Scatter } from './world/Scatter';
 import { DriveFx } from './fx/DriveFx';
 import { GameAudio } from './audio/GameAudio';
 import { Expedition } from './game/Expedition';
+import { Recorder } from './core/Recorder';
 import type { PhysicsContext } from './types';
 
 /**
@@ -39,6 +40,7 @@ export class Game {
   private fx!: DriveFx;
   private audio!: GameAudio;
   private expedition!: Expedition;
+  private recorder!: Recorder;
 
   private running = false;
   private lastTime = 0;
@@ -46,6 +48,8 @@ export class Game {
   private airborneSince = -1;
   private lastGrounded = true;
   private prevVelY = 0;
+  /** HUD overlay state to restore when a recording stops. */
+  private hudBeforeRecord: { controls: boolean; telemetry: boolean } | null = null;
 
   private surfaceAt = (x: number, z: number) => this.terrain.surfaceAt(x, z);
 
@@ -99,6 +103,33 @@ export class Game {
       this.hud.notify(`${kind} ${v}`, 1.6);
     };
 
+    // Records the canvas plus the game's own audio mix. Hides the HUD overlays
+    // while rolling — a control legend and a frame counter are the two things
+    // you least want in footage meant to show the game off.
+    this.recorder = new Recorder(this.engine.canvas, () => this.audio.captureStream());
+    this.recorder.onChange((rec) => {
+      this.hud.recording = rec;
+      if (rec) {
+        this.hudBeforeRecord = {
+          controls: this.hud.showControls,
+          telemetry: this.hud.showTelemetry,
+        };
+        this.hud.showControls = false;
+        this.hud.showTelemetry = false;
+      } else if (this.hudBeforeRecord) {
+        this.hud.showControls = this.hudBeforeRecord.controls;
+        this.hud.showTelemetry = this.hudBeforeRecord.telemetry;
+        this.hudBeforeRecord = null;
+        const f = this.recorder.lastFilename;
+        if (f) {
+          this.hud.notify(
+            this.recorder.capturedAudio ? `SAVED ${f}` : `SAVED ${f} (NO AUDIO)`,
+            3.5,
+          );
+        }
+      }
+    });
+
     this.engine.onResize((w, h) => this.pipeline.resize(w, h));
     this.bindHotkeys();
 
@@ -139,6 +170,9 @@ export class Game {
           break;
         case 'KeyH':
           this.hud.showControls = !this.hud.showControls;
+          break;
+        case 'KeyV':
+          this.recorder.toggle();
           break;
       }
     });
